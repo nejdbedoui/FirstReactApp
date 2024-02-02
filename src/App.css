@@ -40,3 +40,11 @@
 .read-the-docs {
   color: #888;
 }
+
+.EditorJS__top-toolbar {
+  background-color: #f0f0f0;
+}
+
+.EditorJS__top-toolbar .EditorJS__button {
+  color: #ffffff;
+}

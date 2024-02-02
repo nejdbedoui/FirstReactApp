@@ -5,6 +5,7 @@ import './App.css'
 import Header from './components/Header'
 import DragAndDrop from './components/DragAndDrop'
 import DragAndDrop2 from './components/DragAndDrop2'
+import Editorjs from './components/Editorjs'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -15,6 +16,7 @@ function App() {
   return (
     <>
       <div>
+       <Editorjs></Editorjs>
         <Header></Header>
         <DragAndDrop2></DragAndDrop2>
         <DragAndDrop></DragAndDrop>

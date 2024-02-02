@@ -2,6 +2,9 @@ import React from 'react'
 
 export default function Header() {
   return (
-    <div>Header</div>
+    <>
+    <div>HeaderStart</div>
+    <div>HeaderEnd</div>
+    </>
   )
 }
