@@ -5,10 +5,46 @@ import Checklist from '@editorjs/checklist'
 import RawTool from '@editorjs/raw';
 import CustomFontSizeBlock from './CustomBlock';
 import './css.css';
+import datas  from './data.json';
 export const EditorContext=createContext()
 let blockid=null;
 let blockElement=null;
 let data=null;
+const object = {
+  id: 'ssM8VvO73E',
+  type: 'paragraph',
+  data: {
+    fontSize: '',
+    text: 'zeffzf'
+  }
+};
+const list=datas
+const blockList = [
+  {
+    id: 'YBvwIbQmfV',
+    type: 'paragraph',
+    data: {
+      styles: 'font-family: Times New Roman; background-color: red; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
+      text: 'fzefzf'
+    }
+  },
+  {
+    id: 'YBvwIdsmfV',
+    type: 'paragraph',
+    data: {
+      styles: 'font-family: Times New Roman; background-color: green; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
+      text: 'fzefzf'
+    }
+  },
+  {
+    id: 'YBvwIbQfyV',
+    type: 'paragraph',
+    data: {
+      styles: 'font-family: Times New Roman; background-color: yellow; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
+      text: 'fzefzf'
+    }
+  }
+];
  function Editor(props) {
     const editorInstanceRef= useRef(null)
     const initEditor= ()=>{
@@ -16,7 +52,7 @@ let data=null;
           blocks: {
             fontSize: {
               class: CustomFontSizeBlock ,
-              inlineToolbar: true,
+              inlineToolbar: false,
             },
           },
             holder:"editorjs",
@@ -32,15 +68,16 @@ let data=null;
                 }
               },
               raw: {
-                class: RawTool
+                class: RawTool,
+                inlineToolbar: false,
               },
               checklist: {
                 class: Checklist,
-                inlineToolbar: true,
+                inlineToolbar: false,
               },
               fontSize: {
                 class: CustomFontSizeBlock,
-                inlineToolbar: true,
+                inlineToolbar: false,
               },
             },
               onChange: async () => {
@@ -65,8 +102,6 @@ let data=null;
 
 
     const handleBlockClick = async (event) => {
-      data = await editorInstanceRef.current.save();
-      
       const closestBlock = event.target.closest('.ce-block');
       if (closestBlock) {
         blockElement = closestBlock;
@@ -88,6 +123,8 @@ let data=null;
     };
 
     const handleGetData = () => {
+      
+      
       if(blockElement){
         const blockIndex = Array.from(blockElement.parentNode.children).indexOf(blockElement);
         const block = data.blocks[blockIndex];
@@ -99,9 +136,30 @@ let data=null;
     };
 
 
+    const newBlock = async () => {
+      const blockManager = editorInstanceRef.current.blocks;
     
+      for (const blockData of list) {
+        const newBlock = blockManager.insert(blockData.type, blockData.data);
     
-    const handleFontSizeChange = (fontSize) => {
+        await new Promise(resolve => setTimeout(resolve, 0)); // Delay after inserting the block
+    
+        const blockElement = document.querySelector(`[data-id="${newBlock.id}"]`);
+    
+        if (blockElement) {
+          console.log(blockElement);
+          console.log(newBlock)
+          blockElement.setAttribute('id',newBlock.id)
+          blockElement.setAttribute('style', blockData.data.styles);
+        }
+      }
+    };
+
+
+    
+    const handleFontSizeChange =async (fontSize) => {
+      
+      data = await editorInstanceRef.current.save();
       if (blockElement) {
          //change font size
         blockElement.style.fontSize=parseFloat(fontSize)+ 'px';
@@ -130,7 +188,7 @@ let data=null;
         const block = data.blocks[blockIndex];
       //save data
       if(block){
-        block.data.fontSize=blockElement.style.fontSize
+        block.data.styles=stylesText
       }
       } else {
         console.log('Block not found');
@@ -190,6 +248,7 @@ let data=null;
         </select>
       </div>
       <button onClick={handleGetData}>Get Editor Data</button>
+      <button onClick={newBlock}>Add</button>
     <EditorContext.Provider value={{initEditor, editorInstanceRef}}>
         {props.children}
         
