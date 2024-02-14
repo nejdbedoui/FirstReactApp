@@ -14,9 +14,12 @@
     "@editorjs/editorjs": "^2.29.0",
     "@editorjs/header": "^2.8.1",
     "@editorjs/image": "^2.9.0",
+    "@editorjs/raw": "^2.5.0",
+    "framer-motion": "^11.0.3",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

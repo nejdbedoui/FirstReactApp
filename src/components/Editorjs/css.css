@@ -1,0 +1,11 @@
+.ce-toolbar__actions{
+    
+}
+
+.ce-toolbar__plus,.ce-toolbar__settings-btn{
+    background-color: gray; 
+}
+
+.ce-popover{
+    background-color: gray; 
+}
