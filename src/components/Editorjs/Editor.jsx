@@ -10,41 +10,7 @@ export const EditorContext=createContext()
 let blockid=null;
 let blockElement=null;
 let data=null;
-const object = {
-  id: 'ssM8VvO73E',
-  type: 'paragraph',
-  data: {
-    fontSize: '',
-    text: 'zeffzf'
-  }
-};
 const list=datas
-const blockList = [
-  {
-    id: 'YBvwIbQmfV',
-    type: 'paragraph',
-    data: {
-      styles: 'font-family: Times New Roman; background-color: red; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
-      text: 'fzefzf'
-    }
-  },
-  {
-    id: 'YBvwIdsmfV',
-    type: 'paragraph',
-    data: {
-      styles: 'font-family: Times New Roman; background-color: green; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
-      text: 'fzefzf'
-    }
-  },
-  {
-    id: 'YBvwIbQfyV',
-    type: 'paragraph',
-    data: {
-      styles: 'font-family: Times New Roman; background-color: yellow; color: white; display: flex; justify-content: flex-end; border: 2px solid black;',
-      text: 'fzefzf'
-    }
-  }
-];
  function Editor(props) {
     const editorInstanceRef= useRef(null)
     const initEditor= ()=>{
@@ -156,7 +122,7 @@ const blockList = [
     };
 
 
-    
+
     const handleFontSizeChange =async (fontSize) => {
       
       data = await editorInstanceRef.current.save();
