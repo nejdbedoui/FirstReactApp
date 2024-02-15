@@ -10,6 +10,6 @@ export default function Editorjs() {
         }
     },[])
   return (
-    <div style={{ color: "white", backgroundColor: "white", color:"black"}} id='editorjs'></div>
+    <div style={{  backgroundColor: "white", color:"black"}} id='editorjs'></div>
   )
 }

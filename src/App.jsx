@@ -7,6 +7,7 @@ import DragAndDrop from './components/DragAndDrop'
 import DragAndDrop2 from './components/DragAndDrop2'
 import Editorjs from './components/Editorjs/Editorjs'
 import ExampleWrapper from './components/ExampleWrapper'
+import App2 from './components/kraya/App2'
 
 
 function App() {
@@ -18,7 +19,6 @@ function App() {
   return (
     <>
       <div>
-       
        <Editorjs></Editorjs>
         <Header></Header>
         <DragAndDrop2></DragAndDrop2>

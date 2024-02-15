@@ -101,26 +101,102 @@ const list=datas
      
     };
 
-
-    const newBlock = async () => {
+// willl be changed with useeffect when geting the data 
+    const newBlock2 = async () => {
+      // my solution
+      const startTime = performance.now();
       const blockManager = editorInstanceRef.current.blocks;
     
       for (const blockData of list) {
         const newBlock = blockManager.insert(blockData.type, blockData.data);
     
-        await new Promise(resolve => setTimeout(resolve, 0)); // Delay after inserting the block
     
         const blockElement = document.querySelector(`[data-id="${newBlock.id}"]`);
     
         if (blockElement) {
-          console.log(blockElement);
-          console.log(newBlock)
+         // console.log(blockElement);
+         // console.log(newBlock)
           blockElement.setAttribute('id',newBlock.id)
           blockElement.setAttribute('style', blockData.data.styles);
         }
       }
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
     };
 
+    const newBlock3 = async () => {
+      //batch dom updates
+      const startTime = performance.now();
+      const blockManager = editorInstanceRef.current.blocks;
+    
+      const blockElements = [];
+      for (const blockData of list) {
+        const newBlock = blockManager.insert(blockData.type, blockData.data);
+        const blockElement = document.querySelector(`[data-id="${newBlock.id}"]`);
+        if (blockElement) {
+          blockElements.push(blockElement);
+        }
+      }
+      // Apply styles collectively outside the loop
+      for (const [index,blockElement] of blockElements.entries()) {
+        // Retrieve the style from the block's attribute
+        // Apply the style to the block element
+        blockElement.setAttribute('style', list[index].data.styles);
+      }
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
+    };
+
+
+    const newBlock4 = async () => {
+           //ecmascript version 1
+      const startTime = performance.now();
+
+
+
+      const blockManager = editorInstanceRef.current.blocks;
+
+  const blockElements = list.map((blockData) => {
+    const newBlock = blockManager.insert(blockData.type, blockData.data);
+    const blockElement = document.querySelector(`[data-id="${newBlock.id}"]`);
+    return blockElement;
+  }).filter(Boolean);
+
+  blockElements.forEach((blockElement, index) => {
+    const style = list[index].data.styles;
+    blockElement.setAttribute('style', style);
+  });
+
+
+
+
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
+    };
+
+
+
+    const newBlock = async () => {
+      //ecmascript version 2
+      const startTime = performance.now();
+      const blockManager = editorInstanceRef.current.blocks;
+      list.map((blockData) => {
+        const newBlock = blockManager.insert(blockData.type, blockData.data);
+        const blockElement = document.querySelector(`[data-id="${newBlock.id}"]`);
+        return blockElement;
+      })
+        .filter(Boolean)
+        .map((blockElement, index) => {
+          const style = list[index].data.styles;
+          blockElement.setAttribute('style', style);
+        });
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
+    };
 
 
     const handleFontSizeChange =async (fontSize) => {
