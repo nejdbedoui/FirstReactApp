@@ -7,7 +7,7 @@ import App2 from './components/kraya/App2.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <>
-  <App2 />
+  {/* <App2 /> */}
 <Editor>
 <App />
 </Editor>

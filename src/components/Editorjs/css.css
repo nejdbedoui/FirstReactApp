@@ -4,14 +4,14 @@
 
 .ce-toolbar__plus,.ce-toolbar__settings-btn{
     background-color: gray; 
-    display: none;
+   
 }
 
 .ce-popover{
     background-color: gray; 
-    display: none;
+    
 }
 
 .ce-inline-toolbar__toggler-and-button-wrapper{
-    display: none;
+    
 }
