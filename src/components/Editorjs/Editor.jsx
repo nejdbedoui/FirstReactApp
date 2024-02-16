@@ -156,7 +156,6 @@ let endPosition = null;
       }
       const selection = window.getSelection();
       selectedText = selection.toString();
-    
       const range = selection.getRangeAt(0);
       const preSelectionRange = range.cloneRange();
       preSelectionRange.selectNodeContents(blockElement);
@@ -166,12 +165,30 @@ let endPosition = null;
       // Adjust endPosition by excluding the length of the selectedText itself
        endPosition = startPosition + selectedText.length;
     
-      console.log('Start Position:', startPosition);
-      console.log('End Position:', endPosition);
+     
     };
-   const changeColor=  (event)=>{
+
+    const selectcolor=(event)=>{
+      const word="font"
+      const open=`<font style="color: ${event};">`
+      const close='</font>'
       
-      const color = event;
+      changeColor(word,open,close);
+    }
+
+    const selectcolor2=(event)=>{
+      // const word="font"
+      // const open=`<font style="color: ${event};">`
+      // const close='</font>'
+      const word="b"
+      const open=`<b>`
+      const close='</b>'
+      changeColor(word,open,close);
+    }
+
+   const changeColor=  (word,open,close)=>{
+      
+      
         //console.log('Selected Text:', selectedText);
        // console.log('Start Position:', endPosition);
         //console.log('End Position:', startPosition);
@@ -182,57 +199,110 @@ let endPosition = null;
           startPosition = endPosition;
           endPosition = a;
          }
-          console.log('Start Position :', startPosition);
-          console.log('End Position:', endPosition);
         if (blockid) {
           const updatedData = data;
           const currentBlock = updatedData.blocks.find((block) => block.id === blockid);
           
           if (currentBlock) {
-             const currentText = currentBlock.data.text;
+            const currentText = currentBlock.data.text;
+            const textArray = currentText.split('');
             let skipMode = false;
-            for (let i = 0; i < currentBlock.data.text.length; i++) {
-              console.log("i: " + i);
-              console.log("current text: " + currentText[i]);
-              console.log("start: " + startPosition);
-              console.log("end: " + endPosition);
-              if (i === endPosition) {
-                break;
-              }
-             
-              if (currentText[i] === '<' ) {
-                skipMode=true
-              }
-              if( skipMode && i<=startPosition){
-                startPosition++;
-                endPosition++;
-              }
-              if (skipMode && i > startPosition ) {
-                endPosition++;
-              }if (currentText[i] === '>') {
-                skipMode = false;
-              }
-            
-              
+        
+            // Skip over HTML tags and adjust positions
+            for (let i = 0; i < textArray.length && i < endPosition; i++) {
+                if (i === endPosition) {
+                    break;
+                }
+                
+                if (textArray[i] === '<') {
+                    skipMode = true;
+                }
+                
+                if (skipMode && i <= startPosition) {
+                    startPosition++;
+                    endPosition++;
+                }
+                
+                if (skipMode && i > startPosition) {
+                    endPosition++;
+                }
+                
+                if (textArray[i] === '>') {
+                    skipMode = false;
+                }
             }
-        //    console.log('Start Position after:', endPosition);
-         //   console.log('End Position after:', startPosition);
-console.log(currentText.substring(0, startPosition))
-console.log(currentText.substring(startPosition,endPosition))
-console.log(currentText.substring(endPosition))
 
-           
-            const modifiedText =
-              currentText.substring(0, startPosition) +
-              `<font style="color: ${color};">` +
-              currentText.substring(startPosition,endPosition)+`</font>`+currentText.substring(endPosition)
+        
+            // Generate modified text with font style
+            const modifiedText = [
+              
+                currentText.substring(0, startPosition),
+                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).storedCloseTags,
+                open,
+                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).text,
+                close,
+                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).storedOpenTags,
+                currentText.substring(endPosition)
+            ].join('');
+        
             currentBlock.data.text = modifiedText;
           }
 
           editorInstanceRef.current.render(updatedData);
-        console.log("wfeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeet")
+        
       }
     }
+
+    function countAndSubtractTags(text,word) {
+      let storedOpenTags = '';
+      let storedCloseTags = '';
+      let closedtag=false;
+      let startIndex = 0;
+      let endIndex = 0;
+      let startopen=false;
+      let countWord1 = (text.match(new RegExp('<'+word, 'g')) || []).length;
+      let countWord2 = (text.match(new RegExp('</'+word+'>', 'g')) || []).length;
+      
+      while ((startIndex = text.indexOf('<', endIndex)) !== -1) {
+        
+          endIndex = text.indexOf('>', startIndex);
+          if (endIndex === -1) {
+              break; 
+          }
+  
+          const tag = text.substring(startIndex, endIndex + 1);
+          if (tag.startsWith('</'+word)) {
+            if(!startopen){
+              closedtag=true
+              storedCloseTags +=text.substring(startIndex, endIndex+1)
+            }
+            text=text.slice(0, startIndex) + text.slice(endIndex + 1);
+            startIndex = 0;
+            endIndex = 0;
+            countWord2--;
+          } 
+          else if(tag.startsWith('<'+word)) {
+            startopen=true
+             if(countWord2>0 ){
+              countWord1--;
+            }else if(countWord1>0 && countWord2<=0){
+              storedOpenTags += text.substring(startIndex, endIndex+1);
+              closedtag=false
+            }
+            text=text.slice(0, startIndex) + text.slice(endIndex + 1);
+            startIndex = 0;
+            endIndex = 0;
+          }
+          
+          
+      }
+  
+  
+      return { storedOpenTags, storedCloseTags, text };
+  }
+  
+
+
 
     const handleBlockClick = async (event) => {
       const closestBlock = event.target.closest('.ce-block');
@@ -438,16 +508,16 @@ console.log(currentText.substring(endPosition))
           <option value="16">16</option>
           <option value="30">30</option>
         </select>
-        <select onChange={(e) => changeColor(e.target.value)}>
-        <option value="rgb(255, 0, 0)">red</option>
-        <option value="rgb(0, 0, 0)">black</option>
-        <option value="rgb(128, 128, 128)">gray</option>
-        <option value="rgb(0, 128, 0)">green</option>
+        <select onChange={(e) => selectcolor(e.target.value)}>
+        <option value="#FF0000">red</option>
+        <option value="#000000">black</option>
+        <option value="#A7A7A7">gray</option>
+        <option value="#3DC000">green</option>
         </select>
       </div>
       <div>
         <label>Font Style:</label>
-        <select onChange={(e) => handleFontStyleChange( e.target.value)}>
+        <select onChange={(e) => selectcolor2( e.target.value)}>
           <option value="Arial">Arial</option>
           <option value="sans-serif">sans-serif</option>
           <option value="bold">Bold</option>
