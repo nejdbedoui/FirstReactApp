@@ -15,3 +15,12 @@
 .ce-inline-toolbar__toggler-and-button-wrapper{
     
 }
+
+#rc-editable-input-1{
+    background-color: white !important; 
+}
+
+input{
+    background-color: white !important; 
+
+}

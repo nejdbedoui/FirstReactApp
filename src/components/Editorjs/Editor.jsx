@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useRef } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import Checklist from '@editorjs/checklist'
@@ -7,6 +7,12 @@ import CustomFontSizeBlock from './CustomBlock';
 import './css.css';
 import datas  from './data.json';
 import ColorPlugin from 'editorjs-text-color-plugin'; 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './toolBarcss.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBold,faItalic,faAlignLeft,faAlignCenter,faAlignRight,faAlignJustify,faUnderline } from '@fortawesome/free-solid-svg-icons';
+import SketchExample from './SketchExample';
+
 export const EditorContext=createContext()
 let blockid=null;
 let blockElement=null;
@@ -15,7 +21,9 @@ const list=datas
 let selectedText = null;
 let startPosition = null;
 let endPosition = null;
- function Editor(props) {
+
+ function Editor(props)  {
+  
     const editorInstanceRef= useRef(null)
     const initEditor= ()=>{
         const editor =  new EditorJS({
@@ -168,6 +176,18 @@ let endPosition = null;
      
     };
 
+
+
+
+
+////// add bold italic underline or color to selected text ////////
+const handleDataFromChild = (data) => {
+  const word="font"
+  const open=`<font style="color: ${data};">`
+  const close='</font>'
+  
+  changeColor(word,open,close);
+};
     const selectcolor=(event)=>{
       const word="font"
       const open=`<font style="color: ${event};">`
@@ -185,15 +205,20 @@ let endPosition = null;
       const close='</b>'
       changeColor(word,open,close);
     }
-
+    const addstyle = (word) => {
+      const open = `<${word}>`;
+      const close = `</${word}>`;
+      changeColor(word, open, close);
+  }
    const changeColor=  (word,open,close)=>{
       
-      
-        //console.log('Selected Text:', selectedText);
-       // console.log('Start Position:', endPosition);
-        //console.log('End Position:', startPosition);
-    
-        // Update the block's data in Editor.js
+      let left=''
+      let midle=''
+      let right=''
+      let leftResult
+      let midleResult
+      let rightResult
+
         let a=startPosition
         if(startPosition > endPosition){
           startPosition = endPosition;
@@ -208,7 +233,6 @@ let endPosition = null;
             const textArray = currentText.split('');
             let skipMode = false;
         
-            // Skip over HTML tags and adjust positions
             for (let i = 0; i < textArray.length && i < endPosition; i++) {
                 if (i === endPosition) {
                     break;
@@ -232,26 +256,133 @@ let endPosition = null;
                 }
             }
 
-        
-            // Generate modified text with font style
-            const modifiedText = [
-              
+            left=currentText.substring(0, startPosition)
+            midle=currentText.substring(startPosition, endPosition)
+            right=currentText.substring(endPosition)
+            leftResult=checkLeft( left,word)
+            midleResult=countAndSubtractTags(midle,word)
+            rightResult=checkright( right,word)
+            if(leftResult.check && rightResult.check && word!="font"){
+              const modifiedText = [
+                leftResult.text,
+                midleResult.text,
+                rightResult.text
+            ].join('');
+            currentBlock.data.text = modifiedText;
+            }else if(leftResult.check && !rightResult.check && word!="font"){
+              const modifiedText = [
+                leftResult.text,
+                midleResult.text,
+                rightResult.storedOpenTags,
+                rightResult.text
+            ].join('');
+            currentBlock.data.text = modifiedText;
+            }else if(!leftResult.check && rightResult.check && word!="font"){
+              const modifiedText = [
+                leftResult.text,
+                rightResult.CloseTag,
+                midleResult.text,
+                rightResult.text
+            ].join('');
+            currentBlock.data.text = modifiedText;
+            }else if(!leftResult.check && !rightResult.check && leftResult.CloseTag && rightResult.storedOpenTags && word!="font"){
+              console.log("case 4")
+              if(word =="font"){
+                 midleResult.text=open+midleResult.text+close
+               }
+              const modifiedText = [
+                leftResult.text,
+                leftResult.CloseTag,
+                midleResult.text,
+                rightResult.storedOpenTags,
+                rightResult.text
+            ].join('');
+            currentBlock.data.text = modifiedText;
+            }else{
+              console.log("add")
+              const modifiedText = [
                 currentText.substring(0, startPosition),
-                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).storedCloseTags,
+                midleResult.storedCloseTags,
                 open,
-                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).text,
+                midleResult.text,
                 close,
-                countAndSubtractTags(currentText.substring(startPosition, endPosition),word).storedOpenTags,
+                midleResult.storedOpenTags,
                 currentText.substring(endPosition)
             ].join('');
-        
             currentBlock.data.text = modifiedText;
-          }
+            }
+            }
+
 
           editorInstanceRef.current.render(updatedData);
-        
+          console.log('//////////////////////////////////////////////');
       }
     }
+    function checkLeft(text, word) {
+      let storedOpenTags = '';
+  
+      let CloseTag = '';
+      let startIndex = text.length - 1; // Start from the end of the text
+      let endIndex = text.length;
+      let check=false
+      while ((startIndex = text.lastIndexOf('<', startIndex)) !== -1) {
+          endIndex = text.indexOf('>', startIndex);
+          if (endIndex === -1) {
+              break;
+          }
+          const tag = text.substring(startIndex, endIndex + 1);
+          if (tag.startsWith('</' + word)) {
+              break;
+          } else if (tag.startsWith('<' + word)) {
+              console.log(startIndex + " " + endIndex + " " + text.length);
+              storedOpenTags = text.substring(startIndex, endIndex + 1);
+              if (endIndex + 1 === text.length) {
+                  text = text.substring(0, startIndex);
+                  check=true
+              }else{
+                CloseTag='</' + word+'>'
+              }
+              break;
+          }
+          startIndex--; 
+      }
+  
+      return { storedOpenTags, CloseTag, text,check };
+  }
+
+  function checkright(text, word) {
+    let storedOpenTags = '';
+    let CloseTag = '';
+    let startIndex = 0; // Start from the beginning of the text
+    let endIndex = 0;
+    let check=false
+    while ((startIndex = text.indexOf('<', endIndex)) !== -1) {
+        endIndex = text.indexOf('>', startIndex);
+        if (endIndex === -1) {
+            break;
+        }
+        const tag = text.substring(startIndex, endIndex + 1);
+        console.log(startIndex + " " + endIndex + " " + text.length+"  "+tag.length);
+        if (tag.startsWith('</' + word)) {
+            if (tag.length === endIndex+1) {
+                text = text.substring(endIndex+1 ,text.length);
+                CloseTag = tag;
+                check=true
+            } else {
+                CloseTag = tag;
+                storedOpenTags='<' + word+'>'    
+            }
+            break;
+        } else if (tag.startsWith('<' + word)) {
+            break;
+        }
+        endIndex++; // Move to the next '>' character
+    }
+
+    return { storedOpenTags, CloseTag, text,check };
+}
+
+  
 
     function countAndSubtractTags(text,word) {
       let storedOpenTags = '';
@@ -300,10 +431,13 @@ let endPosition = null;
   
       return { storedOpenTags, storedCloseTags, text };
   }
-  
+ ////// end of add bold italic underline or color to selected text ////////
 
 
 
+
+
+////// when block is clicked ////////
     const handleBlockClick = async (event) => {
       const closestBlock = event.target.closest('.ce-block');
       if (closestBlock) {
@@ -314,11 +448,17 @@ let endPosition = null;
         blockid = null;
       }
     };
+////// end of when block is clicked ////////
 
 
+
+
+
+
+
+
+    ////// show clicked block////////
     const handleGetData = () => {
-      
-      
       if(blockElement){
         const blockIndex = Array.from(blockElement.parentNode.children).indexOf(blockElement);
         const block = data.blocks[blockIndex];
@@ -328,6 +468,16 @@ let endPosition = null;
       }
      
     };
+////// end of show clicked block////////
+
+
+
+
+
+
+
+
+///////////////////         load from db          ////////////////////////
 
 // willl be changed with useeffect when geting the data 
     const newBlock2 = async () => {
@@ -426,6 +576,7 @@ let endPosition = null;
       console.log('Elapsed time:', elapsedTime, 'milliseconds');
     };
 
+///////////////////         end of load from db          ////////////////////////
 
     const handleFontSizeChange =async (fontSize) => {
       
@@ -449,7 +600,6 @@ let endPosition = null;
 // ------- trai9a 2 ------- //
        const stylesText = "font-family: Times New Roman; background-color: red; color: white; display: flex; justify-content: flex-end; border: 2px solid black;";
         blockElement.setAttribute('style', stylesText);
-        console.log(blockElement.style)
 // ------- trai9a 2 ------- //
        //change font size
 
@@ -466,7 +616,6 @@ let endPosition = null;
     };
   
     const handleFontStyleChange = ( fontStyle) => {
-      console.log("yes")
       if (blockElement) {
         // Save data
         const blockIndex = Array.from(blockElement.parentNode.children).indexOf(blockElement);
@@ -525,6 +674,46 @@ let endPosition = null;
       </div>
       <button onClick={handleGetData}>Get Editor Data</button>
       <button onClick={newBlock}>Add</button> 
+      <div className="container">
+      <div className="btn-group" role="group" aria-label="Basic example">
+      <button onClick={() => addstyle('b')} type="button" className="btn btn-light btn-sm">
+      <FontAwesomeIcon icon={faBold} />
+      </button>
+      <button onClick={() => addstyle('i')} type="button" className="btn btn-light btn-sm">
+      <FontAwesomeIcon icon={faItalic} />
+      </button>
+      <button onClick={() => addstyle('u')} type="button" className="btn btn-light btn-sm">
+      <FontAwesomeIcon icon={faUnderline} />
+      </button>
+
+        <button type="button" className="btn btn-light btn-sm">
+        <FontAwesomeIcon icon={faAlignLeft} />
+        </button>
+        <button type="button" className="btn btn-light btn-sm">
+        <FontAwesomeIcon icon={faAlignCenter} />
+        </button>
+        <button type="button" className="btn btn-light btn-sm">
+        <FontAwesomeIcon icon={faAlignRight} />
+        </button>
+        <button type="button" className="btn btn-light btn-sm">
+        <FontAwesomeIcon icon={faAlignJustify} />
+        </button>
+        <SketchExample onData={handleDataFromChild} />
+      </div>
+      <div className="btn-group" role="group" aria-label="Basic example">
+      <select class="form-control form-control-sm">
+            <option>8 pt</option>
+            <option>10 pt</option>
+            <option>12 pt</option>
+            <option>14 pt</option>
+            <option>18 pt</option>
+            <option>24 pt</option>
+            <option>36 pt</option>
+        </select>
+        </div>
+    </div>
+    
+    
     <EditorContext.Provider value={{initEditor, editorInstanceRef}}>
         {props.children}
         

@@ -9,6 +9,7 @@ import Editorjs from './components/Editorjs/Editorjs'
 import ExampleWrapper from './components/ExampleWrapper'
 import App2 from './components/kraya/App2'
 import ToolBar from './components/Editorjs/toolBar'
+import SketchExample from './components/Editorjs/SketchExample'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -19,7 +20,6 @@ function App() {
   return (
     <>
       <div>
-        <ToolBar></ToolBar>
        <Editorjs></Editorjs>
         <Header></Header>
         <DragAndDrop2></DragAndDrop2>
