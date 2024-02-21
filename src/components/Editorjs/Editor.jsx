@@ -181,20 +181,30 @@ let endPosition = null;
 
 
 ////// add bold italic underline or color to selected text ////////
+
+const cleanHTMLTags = (text) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'text/html');
+  const emptyTags = doc.querySelectorAll(':empty');
+  emptyTags.forEach((tag) => tag.parentNode.removeChild(tag));
+  const cleanedText = doc.body.innerHTML;
+  return cleanedText;
+};
+
+
 const handleDataFromChild = (data) => {
+  const startTime = performance.now();
   const word="font"
   const open=`<font style="color: ${data};">`
   const close='</font>'
   
   changeColor(word,open,close);
+  const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
 };
-    const selectcolor=(event)=>{
-      const word="font"
-      const open=`<font style="color: ${event};">`
-      const close='</font>'
-      
-      changeColor(word,open,close);
-    }
+
+   
 
     const selectcolor2=(event)=>{
       // const word="font"
@@ -206,12 +216,15 @@ const handleDataFromChild = (data) => {
       changeColor(word,open,close);
     }
     const addstyle = (word) => {
+      const startTime = performance.now();
       const open = `<${word}>`;
       const close = `</${word}>`;
       changeColor(word, open, close);
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      console.log('Elapsed time:', elapsedTime, 'milliseconds');
   }
    const changeColor=  (word,open,close)=>{
-    console.log("yes");
       let left=''
       let midle=''
       let right=''
@@ -229,7 +242,8 @@ const handleDataFromChild = (data) => {
           const currentBlock = updatedData.blocks.find((block) => block.id === blockid);
           
           if (currentBlock) {
-            const currentText = currentBlock.data.text;
+            let currentText = currentBlock.data.text;
+            
             const textArray = currentText.split('');
             let skipMode = false;
         
@@ -255,22 +269,23 @@ const handleDataFromChild = (data) => {
                     skipMode = false;
                 }
             }
-
             left=currentText.substring(0, startPosition)
             midle=currentText.substring(startPosition, endPosition)
             right=currentText.substring(endPosition)
             leftResult=checkLeft( left,word)
             midleResult=countAndSubtractTags(midle,word)
-            rightResult=checkright( right,word)
+            rightResult=checkright(right,word)
+            console.log("left",leftResult)
+            console.log("midle",midleResult)
+            console.log("right",rightResult)
             if(leftResult.check && rightResult.check && word!="font"){
-              console.log("yes");
 
               const modifiedText = [
                 leftResult.text,
                 midleResult.text,
                 rightResult.text
             ].join('');
-            currentBlock.data.text = modifiedText;
+            currentBlock.data.text = cleanHTMLTags(modifiedText);
             }else if(leftResult.check && !rightResult.check && word!="font"){
               console.log("yes");
 
@@ -280,7 +295,7 @@ const handleDataFromChild = (data) => {
                 rightResult.storedOpenTags,
                 rightResult.text
             ].join('');
-            currentBlock.data.text = modifiedText;
+            currentBlock.data.text = cleanHTMLTags(modifiedText);
             }else if(!leftResult.check && rightResult.check && word!="font"){
               console.log("yes");
 
@@ -290,7 +305,7 @@ const handleDataFromChild = (data) => {
                 midleResult.text,
                 rightResult.text
             ].join('');
-            currentBlock.data.text = modifiedText;
+            currentBlock.data.text = cleanHTMLTags(modifiedText);
             }else if(!leftResult.check && !rightResult.check && leftResult.CloseTag && rightResult.storedOpenTags && word!="font"){
               console.log("case 4")
               if(word =="font"){
@@ -303,7 +318,7 @@ const handleDataFromChild = (data) => {
                 rightResult.storedOpenTags,
                 rightResult.text
             ].join('');
-            currentBlock.data.text = modifiedText;
+            currentBlock.data.text = cleanHTMLTags(modifiedText);
             }else{
               console.log("add")
               const modifiedText = [
@@ -315,7 +330,7 @@ const handleDataFromChild = (data) => {
                 midleResult.storedOpenTags,
                 currentText.substring(endPosition)
             ].join('');
-            currentBlock.data.text = modifiedText;
+            currentBlock.data.text = cleanHTMLTags(modifiedText)
             }
             }
 
@@ -324,18 +339,16 @@ const handleDataFromChild = (data) => {
           console.log('//////////////////////////////////////////////');
       }
     }
-    function checkLeft(text, word) {
-      console.log("yes");
 
+    function checkLeft(text, word) {
       let storedOpenTags = '';
       let CloseTag = '';
       let check=false
       if(text!=''){
-        let startIndex = text.length - 1; // Start from the end of the text
+        let startIndex = text.length - 1; 
         let endIndex = text.length;
-      
-      while ((startIndex = text.lastIndexOf('<', startIndex)) !== -1) {
-          endIndex = text.indexOf('>', startIndex);
+      while ((startIndex = text.lastIndexOf('<'+word, startIndex)) !== -1 ) {
+          endIndex = text.indexOf(word+'>', startIndex);
           if (endIndex === -1) {
               break;
           }
@@ -343,15 +356,16 @@ const handleDataFromChild = (data) => {
           if (tag.startsWith('</' + word)) {
               break;
           } else if (tag.startsWith('<' + word)) {
-              console.log(startIndex + " " + endIndex + " " + text.length);
-              storedOpenTags = text.substring(startIndex, endIndex + 1);
+               storedOpenTags = text.substring(startIndex, endIndex + 1);
               if (endIndex + 1 === text.length) {
                   text = text.substring(0, startIndex);
                   check=true
+                  break
               }else{
                 CloseTag='</' + word+'>'
+                break
               }
-              break;
+              
           }
           startIndex--; 
       }
@@ -365,19 +379,17 @@ const handleDataFromChild = (data) => {
 
     let storedOpenTags = '';
     let CloseTag = '';
-    let startIndex = 0; // Start from the beginning of the text
+    let startIndex = 0; 
     let endIndex = 0;
     let check=false
-    if(text!=''){
-
     
-    while ((startIndex = text.indexOf('<', endIndex)) !== -1) {
+    while ((startIndex = text.indexOf('<', endIndex)) !== -1 && endIndex!=text.length) {
         endIndex = text.indexOf('>', startIndex);
         if (endIndex === -1) {
             break;
         }
         const tag = text.substring(startIndex, endIndex + 1);
-        console.log(startIndex + " " + endIndex + " " + text.length+"  "+tag.length);
+       // console.log(startIndex + " " + endIndex + " " + text.length+"  "+tag.length);
         if (tag.startsWith('</' + word)) {
             if (tag.length === endIndex+1) {
                 text = text.substring(endIndex+1 ,text.length);
@@ -393,7 +405,7 @@ const handleDataFromChild = (data) => {
         }
         endIndex++; // Move to the next '>' character
     }
-  }
+  
 
     return { storedOpenTags, CloseTag, text,check };
 }
@@ -603,19 +615,19 @@ const handleDataFromChild = (data) => {
         blockElement.style
 
 // ------- trai9a 1 ------- //
-        // blockElement.style.backgroundColor='red'
-        // blockElement.style.color='white'
-        // blockElement.style.display='flex'
-        // blockElement.style.justifyContent = 'right';
-        // blockElement.style.border = '2px solid black';
-        //blockElement.style.fontFamily='Times New Roman'
+         blockElement.style['backgroundColor']='red'
+         blockElement.style.color='white'
+         blockElement.style.display='flex'
+         blockElement.style.justifyContent = 'right';
+         blockElement.style.border = '2px solid black';
+        blockElement.style.fontFamily='Times New Roman'
 // ------- trai9a 1 ------- //
 
         // tnajem b zouz toro9 ama hedhi 5ir amamoch ashel hh limbaed
 
 // ------- trai9a 2 ------- //
-       const stylesText = "font-family: Times New Roman; background-color: red; color: white; display: flex; justify-content: flex-end; border: 2px solid black;";
-        blockElement.setAttribute('style', stylesText);
+       //const stylesText = "font-family: Times New Roman; background-color: red; color: white; display: flex; justify-content: flex-end; border: 2px solid black;";
+        //blockElement.setAttribute('style', stylesText);
 // ------- trai9a 2 ------- //
        //change font size
 
@@ -672,12 +684,6 @@ const handleDataFromChild = (data) => {
           <option value="15">15</option>
           <option value="16">16</option>
           <option value="30">30</option>
-        </select>
-        <select onChange={(e) => selectcolor(e.target.value)}>
-        <option value="#FF0000">red</option>
-        <option value="#000000">black</option>
-        <option value="#A7A7A7">gray</option>
-        <option value="#3DC000">green</option>
         </select>
       </div>
       <div>
