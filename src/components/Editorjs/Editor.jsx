@@ -224,7 +224,7 @@ const handleDataFromChild = (data) => {
       const elapsedTime = endTime - startTime;
       console.log('Elapsed time:', elapsedTime, 'milliseconds');
   }
-   const changeColor=  (word,open,close)=>{
+   const changeColor=  async (word,open,close)=>{
       let left=''
       let midle=''
       let right=''
@@ -233,9 +233,10 @@ const handleDataFromChild = (data) => {
       let rightResult
 
         let a=startPosition
-        if(startPosition > endPosition){
-          startPosition = endPosition;
-          endPosition = a;
+        let b=endPosition
+        if(a > b){
+          a=startPosition
+          b=startPosition
          }
         if (blockid) {
           const updatedData = data;
@@ -247,8 +248,8 @@ const handleDataFromChild = (data) => {
             const textArray = currentText.split('');
             let skipMode = false;
         
-            for (let i = 0; i < textArray.length && i < endPosition; i++) {
-                if (i === endPosition) {
+            for (let i = 0; i < textArray.length && i < b; i++) {
+                if (i === b) {
                     break;
                 }
                 
@@ -256,28 +257,25 @@ const handleDataFromChild = (data) => {
                     skipMode = true;
                 }
                 
-                if (skipMode && i <= startPosition) {
-                    startPosition++;
-                    endPosition++;
+                if (skipMode && i <= a) {
+                    a++;
+                    b++;
                 }
                 
-                if (skipMode && i > startPosition) {
-                    endPosition++;
+                if (skipMode && i > a) {
+                    b++;
                 }
                 
                 if (textArray[i] === '>') {
                     skipMode = false;
                 }
             }
-            left=currentText.substring(0, startPosition)
-            midle=currentText.substring(startPosition, endPosition)
-            right=currentText.substring(endPosition)
+            left=currentText.substring(0, a)
+            midle=currentText.substring(a, b)
+            right=currentText.substring(b)
             leftResult=checkLeft( left,word)
             midleResult=countAndSubtractTags(midle,word)
             rightResult=checkright(right,word)
-            console.log("left",leftResult)
-            console.log("midle",midleResult)
-            console.log("right",rightResult)
             if(leftResult.check && rightResult.check && word!="font"){
 
               const modifiedText = [
@@ -322,20 +320,18 @@ const handleDataFromChild = (data) => {
             }else{
               console.log("add")
               const modifiedText = [
-                currentText.substring(0, startPosition),
+                currentText.substring(0, a),
                 midleResult.storedCloseTags,
                 open,
                 midleResult.text,
                 close,
                 midleResult.storedOpenTags,
-                currentText.substring(endPosition)
+                currentText.substring(b)
             ].join('');
             currentBlock.data.text = cleanHTMLTags(modifiedText)
             }
             }
-
-
-          editorInstanceRef.current.render(updatedData);
+            editorInstanceRef.current.render(updatedData);
           console.log('//////////////////////////////////////////////');
       }
     }
