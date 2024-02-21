@@ -20,6 +20,7 @@ function App() {
   return (
     <>
       <div>
+        
        <Editorjs></Editorjs>
         <Header></Header>
         <DragAndDrop2></DragAndDrop2>

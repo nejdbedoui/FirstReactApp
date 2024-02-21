@@ -4,7 +4,13 @@ import './toolBarcss.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBold,faItalic,faAlignLeft,faAlignCenter,faAlignRight,faAlignJustify } from '@fortawesome/free-solid-svg-icons';
 import './css.css';
+import { ToastContainer, toast,Bounce  } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 function ToolBar() {
+
+  const notify = () => {
+    toast.success('Wow so easy !');
+  };
   
   return (
     <div className="container">
@@ -40,8 +46,21 @@ function ToolBar() {
             <option>36 pt</option>
         </select>
         </div>
-
        
+        <button onClick={notify}>Notify!</button>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }

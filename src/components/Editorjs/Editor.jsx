@@ -211,7 +211,7 @@ const handleDataFromChild = (data) => {
       changeColor(word, open, close);
   }
    const changeColor=  (word,open,close)=>{
-      
+    console.log("yes");
       let left=''
       let midle=''
       let right=''
@@ -263,6 +263,8 @@ const handleDataFromChild = (data) => {
             midleResult=countAndSubtractTags(midle,word)
             rightResult=checkright( right,word)
             if(leftResult.check && rightResult.check && word!="font"){
+              console.log("yes");
+
               const modifiedText = [
                 leftResult.text,
                 midleResult.text,
@@ -270,6 +272,8 @@ const handleDataFromChild = (data) => {
             ].join('');
             currentBlock.data.text = modifiedText;
             }else if(leftResult.check && !rightResult.check && word!="font"){
+              console.log("yes");
+
               const modifiedText = [
                 leftResult.text,
                 midleResult.text,
@@ -278,6 +282,8 @@ const handleDataFromChild = (data) => {
             ].join('');
             currentBlock.data.text = modifiedText;
             }else if(!leftResult.check && rightResult.check && word!="font"){
+              console.log("yes");
+
               const modifiedText = [
                 leftResult.text,
                 rightResult.CloseTag,
@@ -319,12 +325,15 @@ const handleDataFromChild = (data) => {
       }
     }
     function checkLeft(text, word) {
+      console.log("yes");
+
       let storedOpenTags = '';
-  
       let CloseTag = '';
-      let startIndex = text.length - 1; // Start from the end of the text
-      let endIndex = text.length;
       let check=false
+      if(text!=''){
+        let startIndex = text.length - 1; // Start from the end of the text
+        let endIndex = text.length;
+      
       while ((startIndex = text.lastIndexOf('<', startIndex)) !== -1) {
           endIndex = text.indexOf('>', startIndex);
           if (endIndex === -1) {
@@ -346,16 +355,22 @@ const handleDataFromChild = (data) => {
           }
           startIndex--; 
       }
+    }
   
       return { storedOpenTags, CloseTag, text,check };
   }
 
   function checkright(text, word) {
+    console.log("yes");
+
     let storedOpenTags = '';
     let CloseTag = '';
     let startIndex = 0; // Start from the beginning of the text
     let endIndex = 0;
     let check=false
+    if(text!=''){
+
+    
     while ((startIndex = text.indexOf('<', endIndex)) !== -1) {
         endIndex = text.indexOf('>', startIndex);
         if (endIndex === -1) {
@@ -378,6 +393,7 @@ const handleDataFromChild = (data) => {
         }
         endIndex++; // Move to the next '>' character
     }
+  }
 
     return { storedOpenTags, CloseTag, text,check };
 }
@@ -701,7 +717,7 @@ const handleDataFromChild = (data) => {
         <SketchExample onData={handleDataFromChild} />
       </div>
       <div className="btn-group" role="group" aria-label="Basic example">
-      <select class="form-control form-control-sm">
+      <select className="form-control form-control-sm">
             <option>8 pt</option>
             <option>10 pt</option>
             <option>12 pt</option>
