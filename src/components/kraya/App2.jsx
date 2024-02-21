@@ -8,10 +8,7 @@ import Dashboard from "./Dashboard.jsx";
 export const ThemeContext=createContext(null);
 function App2() {
     let persons = [
-        {
-            name: "Joeeshn",
-            age: 30,
-        },
+       
         {
             name: "Yosra",
             age: 22,
