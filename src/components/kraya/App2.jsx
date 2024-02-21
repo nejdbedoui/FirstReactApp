@@ -9,7 +9,7 @@ export const ThemeContext=createContext(null);
 function App2() {
     let persons = [
         {
-            name: "John",
+            name: "Joeeshn",
             age: 30,
         },
         {
