@@ -10,7 +10,7 @@ import ColorPlugin from 'editorjs-text-color-plugin';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './toolBarcss.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBold,faItalic,faAlignLeft,faAlignCenter,faAlignRight,faAlignJustify,faUnderline } from '@fortawesome/free-solid-svg-icons';
+import { faStrikethrough,faBold,faItalic,faAlignLeft,faAlignCenter,faAlignRight,faAlignJustify,faUnderline } from '@fortawesome/free-solid-svg-icons';
 import SketchExample from './SketchExample';
 
 export const EditorContext=createContext()
@@ -343,12 +343,14 @@ const handleDataFromChild = (data) => {
       if(text!=''){
         let startIndex = text.length - 1; 
         let endIndex = text.length;
-      while ((startIndex = text.lastIndexOf('<'+word, startIndex)) !== -1 ) {
-          endIndex = text.indexOf(word+'>', startIndex);
+      while ((startIndex = text.lastIndexOf('<'+word[0], startIndex)) !== -1 ) {
+          endIndex = text.indexOf(word[word.length-1]+'>', startIndex);
           if (endIndex === -1) {
               break;
           }
           const tag = text.substring(startIndex, endIndex + 1);
+          console.log(startIndex + " " + endIndex + " " + text.length+"  "+tag.length);
+         
           if (tag.startsWith('</' + word)) {
               break;
           } else if (tag.startsWith('<' + word)) {
@@ -356,10 +358,10 @@ const handleDataFromChild = (data) => {
               if (endIndex + 1 === text.length) {
                   text = text.substring(0, startIndex);
                   check=true
-                  break
+                  break;
               }else{
                 CloseTag='</' + word+'>'
-                break
+                break;
               }
               
           }
@@ -703,6 +705,10 @@ const handleDataFromChild = (data) => {
       <button onClick={() => addstyle('u')} type="button" className="btn btn-light btn-sm">
       <FontAwesomeIcon icon={faUnderline} />
       </button>
+      <button onClick={() => addstyle('strike')} type="button" className="btn btn-light btn-sm">
+      <FontAwesomeIcon icon={faStrikethrough} />
+      </button>
+      
 
         <button type="button" className="btn btn-light btn-sm">
         <FontAwesomeIcon icon={faAlignLeft} />
